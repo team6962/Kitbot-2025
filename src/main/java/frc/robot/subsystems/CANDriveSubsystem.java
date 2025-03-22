@@ -12,10 +12,20 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim.KitbotGearing;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim.KitbotMotor;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim.KitbotWheelSize;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 import frc.robot.Constants.DriveConstants;
 
 public class CANDriveSubsystem extends SubsystemBase {
@@ -25,6 +35,10 @@ public class CANDriveSubsystem extends SubsystemBase {
   private final SparkMax rightFollower;
 
   private final DifferentialDrive drive;
+
+  private final DifferentialDrivetrainSim driveSim;
+  private final DifferentialDriveOdometry odometry;
+  private final Field2d fieldSim;
 
   public CANDriveSubsystem() {
     // create brushed motors for drive
@@ -68,10 +82,41 @@ public class CANDriveSubsystem extends SubsystemBase {
     // so that postive values drive both sides forward
     config.inverted(true);
     leftLeader.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    if (Robot.isSimulation()) {
+      driveSim = DifferentialDrivetrainSim.createKitbotSim(
+        KitbotMotor.kDualCIMPerSide, // 2 CIMs per side.
+        KitbotGearing.k10p71,        // 10.71:1
+        KitbotWheelSize.kSixInch,    // 6" diameter wheels.
+        null      // No measurement noise.
+      );
+      odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0), 0, 0);
+    
+      fieldSim = new Field2d();
+      SmartDashboard.putData("Field", fieldSim);
+    } else {
+      driveSim = null;
+      odometry = null;
+      fieldSim = null;
+    }
   }
 
   @Override
   public void periodic() {
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    driveSim.setInputs(
+        leftLeader.get() * RobotController.getBatteryVoltage(),
+        rightLeader.get() * RobotController.getBatteryVoltage());
+    driveSim.update(0.020);
+
+    odometry.update(
+      Rotation2d.fromDegrees(-driveSim.getHeading().getDegrees()),
+      driveSim.getLeftPositionMeters(),
+      driveSim.getRightPositionMeters());
+    fieldSim.setRobotPose(odometry.getPoseMeters());
   }
 
   // Command to drive the robot with joystick inputs
