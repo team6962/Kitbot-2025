@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,6 +33,9 @@ public class RobotContainer {
 
   // The driver's controller
   private final Joystick driverController = new Joystick(OperatorConstants.DRIVER_CONTROLLER_PORT);
+
+  private final SlewRateLimiter driveLimit = new SlewRateLimiter(0.5);
+  private final SlewRateLimiter rotLimit = new SlewRateLimiter(0.5);
 
   // The autonomous chooser
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
@@ -75,7 +79,7 @@ public class RobotContainer {
     // value)
     driveSubsystem.setDefaultCommand(
         driveSubsystem.driveArcade(
-            driveSubsystem, () -> driverController.getY(), () -> -driverController.getX()));
+            driveSubsystem, () -> driveLimit.calculate(driverController.getY()), () -> rotLimit.calculate(-driverController.getX())));
   }
 
   /**
