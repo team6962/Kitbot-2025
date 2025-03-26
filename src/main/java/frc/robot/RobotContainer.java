@@ -5,16 +5,15 @@
 package frc.robot;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.Constants.RollerConstants;
+import frc.robot.Constants.HangConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CANDriveSubsystem;
-import frc.robot.subsystems.CANRollerSubsystem;
+import frc.robot.subsystems.CANHangSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -28,7 +27,7 @@ import frc.robot.subsystems.CANRollerSubsystem;
 public class RobotContainer {
   // The robot's subsystems
   private final CANDriveSubsystem driveSubsystem = new CANDriveSubsystem();
-  private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
+  private final CANHangSubsystem hangSubsystem = new CANHangSubsystem();
 
   // The driver's controller
   private final CommandXboxController driverController = new CommandXboxController(
@@ -67,10 +66,8 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Set the trigger button to run the "runRoller" command from the factory with a fixed
-    // value ejecting the gamepiece while the button is held
-    driverController.a()
-        .whileTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> RollerConstants.ROLLER_EJECT_VALUE, () -> 0));
+    driverController.x().whileTrue(hangSubsystem.runWinch(hangSubsystem, () -> 1));
+    driverController.b().whileTrue(hangSubsystem.runWinch(hangSubsystem, () -> -1));
 
     // Set the default command for the drive subsystem to the command provided by
     // factory with the values provided by the joystick axes on the driver
