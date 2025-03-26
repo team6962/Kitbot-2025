@@ -27,10 +27,9 @@ public final class Constants {
   }
 
   public static final class HangConstants {
-    public static final int HANG_MOTOR_ID = 10;
+    public static final int HANG_MOTOR_ID = 12;
     public static final int HANG_MOTOR_CURRENT_LIMIT = 60;
     public static final double HANG_MOTOR_VOLTAGE_COMP = 10;
-    public static final double HANG_EJECT_VALUE = 0.44;
   }
 
   public static final class OperatorConstants {

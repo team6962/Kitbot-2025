@@ -33,10 +33,10 @@ public class CANHangSubsystem extends SubsystemBase {
     // the roller behave the same as the battery
     // voltage dips. The current limit helps prevent breaker trips or burning out
     // the motor in the event the roller stalls.
-    SparkMaxConfig rollerConfig = new SparkMaxConfig();
-    rollerConfig.voltageCompensation(HangConstants.HANG_MOTOR_VOLTAGE_COMP);
-    rollerConfig.smartCurrentLimit(HangConstants.HANG_MOTOR_CURRENT_LIMIT);
-    hangMotor.configure(rollerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    SparkMaxConfig hangConfig = new SparkMaxConfig();
+    hangConfig.voltageCompensation(HangConstants.HANG_MOTOR_VOLTAGE_COMP);
+    hangConfig.smartCurrentLimit(HangConstants.HANG_MOTOR_CURRENT_LIMIT);
+    hangMotor.configure(hangConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override

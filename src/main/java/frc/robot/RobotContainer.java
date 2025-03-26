@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.Constants.HangConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.CANDriveSubsystem;
 import frc.robot.subsystems.CANHangSubsystem;
@@ -33,8 +32,8 @@ public class RobotContainer {
   private final CommandXboxController driverController = new CommandXboxController(
       OperatorConstants.DRIVER_CONTROLLER_PORT);
 
-  private final SlewRateLimiter driveLimit = new SlewRateLimiter(0.5);
-  private final SlewRateLimiter rotLimit = new SlewRateLimiter(0.5);
+  private final SlewRateLimiter driveLimit = new SlewRateLimiter(4);
+  private final SlewRateLimiter rotLimit = new SlewRateLimiter(4);
 
   // The autonomous chooser
   private final SendableChooser<Command> autoChooser = new SendableChooser<>();
@@ -66,8 +65,10 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    driverController.x().whileTrue(hangSubsystem.runWinch(hangSubsystem, () -> 1));
-    driverController.b().whileTrue(hangSubsystem.runWinch(hangSubsystem, () -> -1));
+    driverController.y().whileTrue(hangSubsystem.runWinch(hangSubsystem, () -> -1));
+    driverController.b().whileTrue(hangSubsystem.runWinch(hangSubsystem, () -> 1));
+
+    hangSubsystem.setDefaultCommand(hangSubsystem.runWinch(hangSubsystem, () -> 0));
 
     // Set the default command for the drive subsystem to the command provided by
     // factory with the values provided by the joystick axes on the driver
@@ -76,7 +77,7 @@ public class RobotContainer {
     // value)
     driveSubsystem.setDefaultCommand(
         driveSubsystem.driveArcade(
-            driveSubsystem, () -> driveLimit.calculate(driverController.getLeftY()), () -> rotLimit.calculate(-driverController.getRightY())));
+            driveSubsystem, () -> driveLimit.calculate(driverController.getLeftY()), () -> rotLimit.calculate(driverController.getLeftTriggerAxis())));
   }
 
   /**
