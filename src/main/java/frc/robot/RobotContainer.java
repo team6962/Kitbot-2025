@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.RollerConstants;
@@ -32,7 +31,8 @@ public class RobotContainer {
   private final CANRollerSubsystem rollerSubsystem = new CANRollerSubsystem();
 
   // The driver's controller
-  private final Joystick driverController = new Joystick(OperatorConstants.DRIVER_CONTROLLER_PORT);
+  private final CommandXboxController driverController = new CommandXboxController(
+      OperatorConstants.DRIVER_CONTROLLER_PORT);
 
   private final SlewRateLimiter driveLimit = new SlewRateLimiter(0.5);
   private final SlewRateLimiter rotLimit = new SlewRateLimiter(0.5);
@@ -69,8 +69,8 @@ public class RobotContainer {
   private void configureBindings() {
     // Set the trigger button to run the "runRoller" command from the factory with a fixed
     // value ejecting the gamepiece while the button is held
-    Trigger triggerButton = new JoystickButton(driverController, Joystick.ButtonType.kTrigger.value);
-    triggerButton.whileTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> RollerConstants.ROLLER_EJECT_VALUE, () -> 0));
+    driverController.a()
+        .whileTrue(rollerSubsystem.runRoller(rollerSubsystem, () -> RollerConstants.ROLLER_EJECT_VALUE, () -> 0));
 
     // Set the default command for the drive subsystem to the command provided by
     // factory with the values provided by the joystick axes on the driver
@@ -79,7 +79,7 @@ public class RobotContainer {
     // value)
     driveSubsystem.setDefaultCommand(
         driveSubsystem.driveArcade(
-            driveSubsystem, () -> driveLimit.calculate(driverController.getY()), () -> rotLimit.calculate(-driverController.getX())));
+            driveSubsystem, () -> driveLimit.calculate(driverController.getLeftY()), () -> rotLimit.calculate(-driverController.getRightY())));
   }
 
   /**
